@@ -1,0 +1,7 @@
+title,description,department,priority,requesterName,assignee
+,HVAC unit in building 3 is not working properly,FACILITIES,HIGH,John Smith,Jane Doe
+Fix HVAC unit,,FACILITIES,HIGH,John Smith,Jane Doe
+Fix HVAC unit,HVAC unit in building 3 is not working properly,,HIGH,John Smith,Jane Doe
+Fix HVAC unit,HVAC unit in building 3 is not working properly,FACILITIES,,John Smith,Jane Doe
+Fix HVAC unit,HVAC unit in building 3 is not working properly,FACILITIES,HIGH,,Jane Doe
+,,,,,

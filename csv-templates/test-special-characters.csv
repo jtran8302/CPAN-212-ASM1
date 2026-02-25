@@ -1,0 +1,6 @@
+title,description,department,priority,requesterName,assignee
+"Fix HVAC, unit",HVAC unit in building 3 is not working properly,FACILITIES,HIGH,John Smith,Jane Doe
+Fix HVAC unit,"HVAC unit in ""building 3"" is not working properly",IT,MEDIUM,Alice Johnson,Bob Lee
+Repair Café sign,The café sign on floor 2 needs repair urgently,SECURITY,LOW,José García,
+Fix résumé printer,The résumé printer on floor 5 is jammed and needs fixing,HR,HIGH,François Müller,Tom Davis
+"Title with, comma","Description with ""double quotes"" and, commas",FACILITIES,MEDIUM,Mike O'Brien,Jane Doe

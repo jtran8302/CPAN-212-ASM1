@@ -1,0 +1,296 @@
+{
+  "info": {
+    "name": "WorkOrderHub",
+    "description": "WorkOrderHub API collection — covers all endpoints for work order management.\nSet BASE_URL and API_KEY in your Postman environment before running.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "API_KEY",
+      "value": "mysecretkey123"
+    },
+    {
+      "key": "WORK_ORDER_ID",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check (no auth)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/health",
+          "host": ["{{BASE_URL}}"],
+          "path": ["health"]
+        },
+        "description": "Health check endpoint — no API key required. Returns { status: 'ok', time: ... }"
+      }
+    },
+    {
+      "name": "API route without API key → 401",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders"]
+        },
+        "description": "Should return 401 UNAUTHORIZED because no x-api-key header is provided."
+      }
+    },
+    {
+      "name": "Create Work Order (valid)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+              "    pm.collectionVariables.set('WORK_ORDER_ID', jsonData.data.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Fix broken elevator\",\n  \"description\": \"Elevator in building A is stuck on floor 3 and not responding\",\n  \"department\": \"FACILITIES\",\n  \"priority\": \"HIGH\",\n  \"requesterName\": \"John Smith\",\n  \"assignee\": \"Jane Doe\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders"]
+        },
+        "description": "Creates a valid work order. Saves the returned id to WORK_ORDER_ID for subsequent requests."
+      }
+    },
+    {
+      "name": "Create Work Order (invalid) → VALIDATION_ERROR",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Hi\",\n  \"description\": \"Short\",\n  \"department\": \"INVALID\",\n  \"priority\": \"EXTREME\",\n  \"requesterName\": \"AB\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders"]
+        },
+        "description": "Should return 400 VALIDATION_ERROR with a details array listing all field errors."
+      }
+    },
+    {
+      "name": "List Work Orders",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders"]
+        },
+        "description": "Lists all work orders. Supports query params: status, department, priority, assignee, q, page, limit."
+      }
+    },
+    {
+      "name": "List Work Orders (with filters)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders?status=NEW&department=FACILITIES&page=1&limit=5",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders"],
+          "query": [
+            { "key": "status", "value": "NEW" },
+            { "key": "department", "value": "FACILITIES" },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "5" }
+          ]
+        },
+        "description": "Lists work orders filtered by status and department with pagination."
+      }
+    },
+    {
+      "name": "Get Work Order by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/{{WORK_ORDER_ID}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "{{WORK_ORDER_ID}}"]
+        },
+        "description": "Gets a single work order by ID. Uses the ID saved from the create request."
+      }
+    },
+    {
+      "name": "Update Work Order",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Fix broken elevator (updated)\",\n  \"priority\": \"MEDIUM\",\n  \"assignee\": \"Bob Lee\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/{{WORK_ORDER_ID}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "{{WORK_ORDER_ID}}"]
+        },
+        "description": "Updates title, priority, and assignee. Only sends fields that changed."
+      }
+    },
+    {
+      "name": "Change Status (valid: NEW → IN_PROGRESS)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/{{WORK_ORDER_ID}}/status",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "{{WORK_ORDER_ID}}", "status"]
+        },
+        "description": "Valid transition from NEW to IN_PROGRESS."
+      }
+    },
+    {
+      "name": "Change Status (invalid: IN_PROGRESS → NEW) → 409",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"NEW\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/{{WORK_ORDER_ID}}/status",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "{{WORK_ORDER_ID}}", "status"]
+        },
+        "description": "Should return 409 INVALID_TRANSITION — can't go from IN_PROGRESS back to NEW."
+      }
+    },
+    {
+      "name": "Bulk Upload (valid CSV)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "",
+              "description": "Select the workorders-sample-valid.csv file from csv-templates/"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/bulk-upload",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "bulk-upload"]
+        },
+        "description": "Upload a valid CSV file. Should return accepted count and no errors. Select the csv-templates/workorders-sample-valid.csv file."
+      }
+    },
+    {
+      "name": "Bulk Upload (non-CSV file) → 415",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "",
+              "description": "Select any non-CSV file (e.g. a .txt or .json file)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/bulk-upload",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "bulk-upload"]
+        },
+        "description": "Should return 415 UNSUPPORTED_MEDIA_TYPE because only .csv files are accepted."
+      }
+    },
+    {
+      "name": "Delete Work Order",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/{{WORK_ORDER_ID}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "{{WORK_ORDER_ID}}"]
+        },
+        "description": "Deletes the work order. Returns 204 No Content."
+      }
+    },
+    {
+      "name": "Get Deleted Work Order → 404",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "x-api-key", "value": "{{API_KEY}}" }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/workorders/{{WORK_ORDER_ID}}",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "workorders", "{{WORK_ORDER_ID}}"]
+        },
+        "description": "Should return 404 NOT_FOUND because the work order was just deleted."
+      }
+    }
+  ]
+}

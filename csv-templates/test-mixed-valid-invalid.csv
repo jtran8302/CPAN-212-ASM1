@@ -1,0 +1,8 @@
+title,description,department,priority,requesterName,assignee
+Fix HVAC unit,HVAC unit in building 3 is not working properly,FACILITIES,HIGH,John Smith,Jane Doe
+Fix,Short desc,MARKETING,URGENT,Jo,
+Network outage,Network connectivity issue in floor 2 office,IT,MEDIUM,Alice Johnson,Bob Lee
+Test,Not enough,SALES,low,AB,
+Security badge,New security badge required for contractor access,SECURITY,LOW,Mike Brown,
+Onboard new hire,Setup workstation and accounts for new employee,HR,MEDIUM,Sarah Wilson,Tom Davis
+HVAC,Too short,FINANCE,CRITICAL,Xi,
